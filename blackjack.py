@@ -1,13 +1,11 @@
 import os
 from typing import Optional
-
 import numpy as np
-
 import gymnasium as gym
 from gymnasium import spaces
 from gymnasium.error import DependencyNotInstalled
 
-
+# Comparing the sum of the cards
 def cmp(a, b):
     return float(a > b) - float(a < b)
 
@@ -24,28 +22,34 @@ def draw_hand(np_random):
     return [draw_card(np_random), draw_card(np_random)]
 
 
-def usable_ace(hand):  # Does this hand have a usable ace?
+# Does this hand have a usable ace?
+def usable_ace(hand):
     return int(1 in hand and sum(hand) + 10 <= 21)
 
 
-def sum_hand(hand):  # Return current hand total
+# Return current hand total
+def sum_hand(hand):
     if usable_ace(hand):
         return sum(hand) + 10
     return sum(hand)
 
 
-def is_bust(hand):  # Is this hand a bust?
+# Is this hand a bust?
+def is_bust(hand):
     return sum_hand(hand) > 21
 
 
-def score(hand):  # What is the score of this hand (0 if bust)
+# What is the score of this hand (0 if bust)
+def score(hand):
     return 0 if is_bust(hand) else sum_hand(hand)
 
 
-def is_natural(hand):  # Is this hand a natural blackjack?
+# Is this hand a natural blackjack?
+def is_natural(hand):
     return sorted(hand) == [1, 10]
 
 
+# Modified blackjack environment to support two hands at a time
 class BlackjackEnv(gym.Env):
     """
     Blackjack is a card game where the goal is to beat the dealer by obtaining cards
@@ -173,6 +177,7 @@ class BlackjackEnv(gym.Env):
         assert self.action_space.contains(actions[0])
         assert self.action_space.contains(actions[1])
 
+        # Iterate through player actions
         for i, action in enumerate(actions):
             if not self.terminated[i]:
                 if action:  # hit: add a card to players hand and return
@@ -180,7 +185,7 @@ class BlackjackEnv(gym.Env):
                     if is_bust(self.players[i]):
                         self.terminated[i] = True
                         rewards[i] = -1.0
-                # stick
+                # stick, yield to next player or dealer
                 else:
                         self.terminated[i] = True
 
@@ -206,6 +211,7 @@ class BlackjackEnv(gym.Env):
 
         if self.render_mode == "human":
             self.render()
+
         # truncation=False as the time limit is handled by the `TimeLimit` wrapper added during `make`
         return self._get_obs(), rewards, all(self.terminated), False, {}
 
@@ -215,11 +221,13 @@ class BlackjackEnv(gym.Env):
             sum_hand(self.players[1]), self.dealer[0], usable_ace(self.players[1])
         )
 
+    # Reset function used to reset the environment after a hand
     def reset(
         self,
         seed: Optional[int] = None,
         options: Optional[dict] = None,
     ):
+        # Reset class attributes
         super().reset(seed=seed)
         self.dealer = draw_hand(self.np_random)
         self.players = [draw_hand(self.np_random), draw_hand(self.np_random)]
@@ -364,4 +372,3 @@ class BlackjackEnv(gym.Env):
 
             pygame.display.quit()
             pygame.quit()
-
