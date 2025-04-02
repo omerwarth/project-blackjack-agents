@@ -1,35 +1,38 @@
-#import blackjack
+#%%
 import gymnasium as gym
+from blackjack import BlackjackEnv
 import matplotlib.pyplot as plt
 import time
-
+#%%
 # Create the Blackjack environment
-env = gym.make("Blackjack-v1", render_mode="human")
+env = BlackjackEnv(natural=False, sab=False)
+action_map = {0: "Stick", 1: "Hit"}
 
-# Initialize the game
-state = env.reset()
-done = False
-
-# Loop through the game until it's finished
-while not done:
-    # Print the current state of the game
-    print(f"Current state: {state}")
-
-    # Choose an action (hit or stick)
-    action = env.action_space.sample()
-    print(f"Taking action: {action}")
-
-    # Take the action and observe the result
-    next_state, reward, terminated, truncated, info = env.step(action)
-
-    # Print the next state of the game
-    print(f"Next state: {next_state}")
-    print(f"Reward: {reward}")
-
-    # Update the state
-    state = next_state
-
-    time.sleep(1)
-
+#%%
+for episode in range(1):
+    run = True
+    state, info = env.reset()
+    print(state)
+    
+    while run:        
+        action1 = env.action_space.sample()
+        action2 = env.action_space.sample()
+        
+        print(f'Player 1 will: {action_map[action1]} and player2 will: {action_map[action2]}')
+        
+        next_state, reward, terminated, truncated, info = env.step((action1, action2))
+        
+        print(f'The dealer has: {next_state[1]}, and the two hands are now: {next_state[0]} and {next_state[3]}')
+        
+        time.sleep(1)
+        
+        if terminated:
+            run = False
+        
+        state = next_state
+            
+        
 # The game is finished, so close the window
 env.close()
+        
+#%%
