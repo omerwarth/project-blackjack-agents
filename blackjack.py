@@ -150,7 +150,7 @@ class BlackjackEnv(gym.Env):
     }
 
     def __init__(self, render_mode: Optional[str] = None, natural=False, sab=False):
-        self.action_space = spaces.Tuple((spaces.Discrete(2), spaces.Discrete(2)))
+        self.action_space = spaces.Discrete(2)
         self.observation_space = spaces.Tuple(
             (
                 spaces.Discrete(32), spaces.Discrete(11), spaces.Discrete(2),
@@ -166,39 +166,39 @@ class BlackjackEnv(gym.Env):
         self.sab = sab
 
         self.render_mode = render_mode
+        self.terminated = [False, False]
 
     def step(self, actions):
         rewards = [0.0, 0.0]
-        terminated = [False, False]
         assert self.action_space.contains(actions[0])
         assert self.action_space.contains(actions[1])
 
         for i, action in enumerate(actions):
-            if not terminated[i]:
+            if not self.terminated[i]:
                 if action:  # hit: add a card to players hand and return
                     self.players[i].append(draw_card(self.np_random))
                     if is_bust(self.players[i]):
-                        terminated[i] = True
+                        self.terminated[i] = True
                         rewards[i] = -1.0
                 # stick
                 else:
-                        terminated = False
+                        self.terminated[i] = True
 
         #Dealer's turn
-        if all(terminated):
+        if all(self.terminated):
             while sum_hand(self.dealer) < 17:
                 self.dealer.append(draw_card(self.np_random))
 
             for i in range(2):
-                if not is_bust(self.plyers[i]):
+                if not is_bust(self.players[i]):
                     rewards[i] = cmp(score(self.players[i]), score(self.dealer))
-                    if self.sab and is_natural(self.player) and not is_natural(self.dealer):
+                    if self.sab and is_natural(self.players[i]) and not is_natural(self.dealer):
                         # Player automatically wins. Rules consistent with S&B
                         rewards[i] = 1.0
                     elif (
                         not self.sab
                         and self.natural
-                        and is_natural(self.player)
+                        and is_natural(self.players[i])
                         and rewards[i] == 1.0
                     ):
                         # Natural gives extra points, but doesn't autowin. Legacy implementation
@@ -207,7 +207,7 @@ class BlackjackEnv(gym.Env):
         if self.render_mode == "human":
             self.render()
         # truncation=False as the time limit is handled by the `TimeLimit` wrapper added during `make`
-        return self._get_obs(), rewards, all(terminated), False, {}
+        return self._get_obs(), rewards, all(self.terminated), False, {}
 
     def _get_obs(self):
         return (
@@ -223,6 +223,7 @@ class BlackjackEnv(gym.Env):
         super().reset(seed=seed)
         self.dealer = draw_hand(self.np_random)
         self.players = [draw_hand(self.np_random), draw_hand(self.np_random)]
+        self.terminated = [False, False]
 
         player1_sum, dealer_card_value, player1_usable_ace, player2_sum, _, player2_usable_ace = self._get_obs()
 
@@ -330,7 +331,7 @@ class BlackjackEnv(gym.Env):
         )
 
         large_font = get_font(os.path.join("font", "Minecraft.ttf"), screen_height // 6)
-        player_sum_text = large_font.render(str(player_sum), True, white)
+        player_sum_text = large_font.render(str(player_sum1), True, white)
         player_sum_text_rect = self.screen.blit(
             player_sum_text,
             (
@@ -364,5 +365,3 @@ class BlackjackEnv(gym.Env):
             pygame.display.quit()
             pygame.quit()
 
-
-# Pixel art from Mariia Khmelnytska (https://www.123rf.com/photo_104453049_stock-vector-pixel-art-playing-cards-standart-deck-vector-set.html)
