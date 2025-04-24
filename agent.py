@@ -5,13 +5,16 @@ import numpy as np
 from blackjack import BlackjackEnv
 import matplotlib.pyplot as plt
 from BlackjackAgent import BlackjackAgent
-#%%
+
+# You only need to run this file for both of the algorithms to run
+
 # Create the Blackjack environment
 env = BlackjackEnv(natural=False, sab=False)
 
 # Set an action map
 action_map = {0: "Stick", 1: "Hit"}
 
+# Number of episodes that it trains on (was 1000000 for the results on the report)
 n_episodes = 200000
 start_epsilon = 1.0
 
@@ -61,7 +64,7 @@ for episode in range(n_episodes):
             BlackjackAgent.update(agent2, obs=state[3:], action=action2, reward=reward[1], next_obs=next_state[3:], next_act = next_act, type = False)
         state = next_state
         action1 = next_act
-        
+    # Decays both of the agents 
     BlackjackAgent.decay_epsilon(agent1)
     BlackjackAgent.decay_epsilon(agent2)
 
@@ -70,6 +73,7 @@ player1 = 0.0
 player2 = 0.0
 total = 0.0
 
+# Testing loop that gets the winning percentage for both algorithms
 for i in range(10000):
     obs, _ = env.reset()
     done = [False, False]
@@ -85,6 +89,7 @@ print("SARSA: ",player1/total*100, "%")
 print("Q-learning: ",player2/total*100, "%\n")
 input0 = int(input("Enter 1 if you would like to see a sample game and 2 if you would like to see a graph of optimal policy/value of each state "))
 
+# Displays a sample game of Blackjack
 if input0 == 1:
     env = BlackjackEnv(render_mode="human")
     obs, _ = env.reset()
@@ -94,6 +99,7 @@ if input0 == 1:
         time.sleep(4)
         obs, rewards, done, info, _ = env.step(actions)
     time.sleep(10)
+# Displays the table and graph of one of the algorithms
 else:
     ace = False
     input2 = int(input("Enter 1 if you want to see the policy/value for SARSA and 2 if you want to see Q-learning "))

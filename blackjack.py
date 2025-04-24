@@ -319,15 +319,12 @@ class BlackjackEnv(gym.Env):
         def scale_card_img(card_img):
             return pygame.transform.scale(card_img, (card_img_width, card_img_height))
 
-        # Fonts
         small_font = pygame.font.SysFont("Arial", screen_height // 20)
         large_font = get_font(os.path.join("font", "Minecraft.ttf"), screen_height // 8)
 
-        # Dealer Text
         dealer_text = small_font.render("Dealer:", True, white)
         dealer_text_rect = self.screen.blit(dealer_text, (spacing, spacing))
 
-        # Dealer Cards
         dealer_card_y = dealer_text_rect.bottom + spacing
         card_y = dealer_card_y
         card_x_center = screen_width // 2
@@ -348,7 +345,6 @@ class BlackjackEnv(gym.Env):
 
         self.screen.blit(hidden_card_img, (right_card_x, card_y))
 
-        # Player 1
         p1_text = small_font.render("Player 1", True, white)
         p1_text_rect = self.screen.blit(p1_text, (spacing, card_y + card_img_height + 2 * spacing))
 
@@ -363,7 +359,6 @@ class BlackjackEnv(gym.Env):
                 ace_text, (spacing, p1_sum_rect.bottom + spacing // 2)
             )
 
-        # Player 2
         p2_text = small_font.render("Player 2", True, white)
         p2_text_rect = self.screen.blit(
             p2_text, (screen_width - spacing - small_font.size("Player 2")[0], card_y + card_img_height + 2 * spacing)
@@ -387,13 +382,11 @@ class BlackjackEnv(gym.Env):
                 )
             )
 
-        # === New: Display results and dealer total if revealed ===
         if getattr(self, "reveal_dealer_card", False):
-            dealer_total = self.dealer_total  # Assumes you store dealer total in this attr
+            dealer_total = self.dealer_total
             dealer_sum_text = small_font.render(f"Dealer Total: {dealer_total}", True, white)
             self.screen.blit(dealer_sum_text, (card_x_center - dealer_sum_text.get_width() // 2, card_y + card_img_height + spacing))
 
-            # Win/Lose/Draw text for both players
             def get_result_text(player_sum):
                 if player_sum > 21:
                     return "Lose"
