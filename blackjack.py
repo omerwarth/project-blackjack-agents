@@ -285,6 +285,7 @@ class BlackjackEnv(gym.Env):
         import os
         import numpy as np
 
+        # Displaying the modified pygame representation
         player_sum1, dealer_card_value, usable_ace1, player_sum2, dealer_hidden_value, usable_ace2 = self._get_obs()
         screen_width, screen_height = 800, 600
         card_img_height = screen_height // 4
