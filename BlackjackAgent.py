@@ -1,14 +1,10 @@
 from __future__ import annotations
-
 from collections import defaultdict
 import seaborn as sns
-
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Patch
-
 import gymnasium as gym
-
 
 class BlackjackAgent:
     # Initializes the Blackjack agent with the given values
