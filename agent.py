@@ -99,6 +99,7 @@ if input0 == 1:
         time.sleep(4)
         obs, rewards, done, info, _ = env.step(actions)
     time.sleep(10)
+    
 # Displays the table and graph of one of the algorithms
 else:
     ace = False
